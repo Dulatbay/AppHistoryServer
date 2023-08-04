@@ -22,6 +22,7 @@ namespace AppHistoryServer.Models
 
         // Relationships
         public ICollection<Question>? Questions { get; set; }
+        public ICollection<PassedUserTopics>? PassedUserTopics { get; set; }
 
         public ICollection<Term>? Terms { get; set; }
         public ICollection<Date>? Dates { get; set; }

@@ -18,9 +18,11 @@ namespace AppHistoryServer
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                    .HasMany(c => c.FavouriteQuizzes)
-                    .WithMany(s => s.AddedFavouriteUsers)
-                    .UsingEntity(j => j.ToTable("FavouriteUserQuizes"));
+                    .HasMany(c => c.FavoritedQuizzes)
+                    .WithMany(s => s.AddedFavoritedUsers)
+                    .UsingEntity(j => j.ToTable("FavoritedUserQuizzes"));
+
+
         }
     }
 }

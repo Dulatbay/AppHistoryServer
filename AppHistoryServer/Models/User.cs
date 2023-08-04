@@ -23,6 +23,7 @@ namespace AppHistoryServer.Models
         public ICollection<Quiz>? FavoritedQuizzes{ get; set; } 
         public ICollection<PassedUserTopics>? PassedUserTopics{ get; set; } 
         public ICollection<PassedUserQuestions>? PassedUserQuestions{ get; set; } 
+        public ICollection<PassedUserQuizzes>? PassedUserQuizzes{ get; set; } 
 
 
         public static User GetUserByRegisterDto(RegisterDto register)

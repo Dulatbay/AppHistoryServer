@@ -18,5 +18,15 @@ namespace AppHistoryServer.Models
 
         [Required]
         public Node content { get; set; } = null!;
+
+
+        // Relationships
+        public ICollection<Question>? Questions { get; set; }
+
+        public ICollection<Term>? Terms { get; set; }
+        public ICollection<Date>? Dates { get; set; }
+
+
+
     }
 }

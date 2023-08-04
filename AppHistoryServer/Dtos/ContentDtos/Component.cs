@@ -4,6 +4,8 @@
   {
         ContentViewer,
         Stack, 
-        Map
+        Map,
+        TextQuestion,
+        ImageQuestion
   }
 }

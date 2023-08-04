@@ -18,7 +18,5 @@ namespace AppHistoryServer.Models
         [Required]
         public int Minutes { get; set; }
 
-        public ICollection<Question> Questions { get; set; } = null!;
-
     }
 }

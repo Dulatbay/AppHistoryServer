@@ -1,12 +1,14 @@
-﻿namespace AppHistoryServer.Dtos
+﻿using System.IdentityModel.Tokens.Jwt;
+
+namespace AppHistoryServer.Dtos
 {
     public class AuthResponseDto
     {
-        private string? Token { get; set; }
+        public string? Token { get; set; }
 
-        public AuthResponseDto(string? token)
+        public AuthResponseDto(JwtSecurityToken token)
         {
-            Token = token;
+            Token = new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

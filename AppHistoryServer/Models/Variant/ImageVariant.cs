@@ -1,4 +1,4 @@
-﻿namespace AppHistoryServer.Dtos.ContentDtos.Variant
+﻿namespace AppHistoryServer.Models.Variant
 {
     public class ImageVariant : Variant
     {

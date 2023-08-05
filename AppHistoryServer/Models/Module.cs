@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AppHistoryServer.Models.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace AppHistoryServer.Models
 {
-    public class Module
+    public class Module : IModelId
     {
         public int Id { get; set; }
 

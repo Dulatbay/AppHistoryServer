@@ -1,5 +1,4 @@
 ﻿using AppHistoryServer.Dtos;
-using AppHistoryServer.Services.Impl;
 using AppHistoryServer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,5 +50,23 @@ namespace AppHistoryServer.Controllers
                 return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
             }
         }
+        [HttpGet("/me")]
+        public async Task<IActionResult> GetMe()
+        {
+            try
+            {
+                return Ok(await _authService.GetMe());
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
+            }
+        }
+
     }
 }

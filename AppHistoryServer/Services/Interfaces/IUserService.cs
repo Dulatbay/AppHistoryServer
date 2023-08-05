@@ -1,11 +1,10 @@
 ﻿using AppHistoryServer.Models;
+using AppHistoryServer.Services.BaseInterfaces;
 
 namespace AppHistoryServer.Services.Interfaces
 {
-    public interface IUserService
+    public interface IUserService : IGetterService<User>
     {
-        public IEnumerable<User> GetAllUsers();
-        public Task<User?> GetUserById(int id);
         public Task<User?> GetUserByEmail(string email);
     }
 }

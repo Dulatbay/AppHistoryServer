@@ -1,10 +1,10 @@
 ﻿using AppHistoryServer.Dtos.ContentDtos;
+using AppHistoryServer.Models.Interfaces;
 using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 
 namespace AppHistoryServer.Models
 {
-    public class Topic
+    public class Topic : IModelId
     {
         public int Id { get; set; }
 
@@ -14,6 +14,7 @@ namespace AppHistoryServer.Models
         [Required]
         public int number { get; set; }
 
+        [Required]
         public Module Module { get; set; } = null!;
 
         [Required]

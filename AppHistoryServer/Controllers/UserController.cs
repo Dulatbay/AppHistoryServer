@@ -22,7 +22,7 @@ namespace AppHistoryServer.Controllers
         {
             try
             {
-                return Ok( _userService.GetAllUsers());
+                return Ok(_userService.GetAll());
             }
             catch (Exception ex)
             {
@@ -36,7 +36,10 @@ namespace AppHistoryServer.Controllers
         {
             try
             {
-                return Ok(await _userService.GetUserById(id));
+                var result = await _userService.GetByIdAsync(id);
+                if (result == null)
+                    return Ok(new { });
+                return Ok(result);
             }
             catch (Exception ex)
             {

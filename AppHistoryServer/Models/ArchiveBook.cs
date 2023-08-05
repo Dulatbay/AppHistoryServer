@@ -1,6 +1,8 @@
-﻿namespace AppHistoryServer.Models
+﻿using AppHistoryServer.Models.Interfaces;
+
+namespace AppHistoryServer.Models
 {
-    public class ArchiveBook
+    public class ArchiveBook : IModelId
     {
         public int Id { get; set; }
         public int Grade { get; set; }

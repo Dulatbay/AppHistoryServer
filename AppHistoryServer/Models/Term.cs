@@ -1,6 +1,8 @@
-﻿namespace AppHistoryServer.Models
+﻿using AppHistoryServer.Models.Interfaces;
+
+namespace AppHistoryServer.Models
 {
-    public class Term
+    public class Term : IModelId
     {
         public int Id { get; set; }
         public int TermText { get; set; }

@@ -1,4 +1,5 @@
 ﻿using AppHistoryServer.Models;
+using AppHistoryServer.Repositories.BaseInterfaces;
 using AppHistoryServer.Repositories.Interfaces;
 using AppHistoryServer.Services.Interfaces;
 
@@ -13,10 +14,13 @@ namespace AppHistoryServer.Services.Impl
             _userRepository = userRepository;
         }
 
-        public IEnumerable<User> GetAllUsers() => _userRepository.GetAllUsersAsync();
+        public IEnumerable<User> GetAll() => _userRepository.GetAll();
+
+        public IGetterRepository<User> GetGetterRepository() => _userRepository;
 
         public async Task<User?> GetUserByEmail(string email) => await _userRepository.GetUserByEmailAsync(email);
 
-        public async Task<User?> GetUserById(int id) => await _userRepository.GetUserByIdAsync(id);
+        public async Task<User?> GetByIdAsync(int id) => await _userRepository.GetByIdAsync(id);
+
     }
 }

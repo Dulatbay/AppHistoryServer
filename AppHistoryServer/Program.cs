@@ -9,6 +9,7 @@ using AppHistoryServer.Models;
 using AppHistoryServer.Services.Impl;
 using AppHistoryServer.Repositories.Interfaces;
 using AppHistoryServer.Repositories.Impl;
+using AppHistoryServer.Utils.Initializer;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -20,9 +21,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<IUserService, UserService>();
-builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IModuleService, ModuleService>();
+
 builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IVariantRepository, VariantRepository>();
+builder.Services.AddTransient<IModuleRepository, ModuleRepository>();
+builder.Services.AddTransient<IQuestionRepository, QuestionRepository>();
+builder.Services.AddTransient<ITopicRepository, TopicRepository>();
+builder.Services.AddTransient<IArchiveBookRepository, ArchiveBookRepository>();
+builder.Services.AddTransient<IQuizRepository, QuizRepository>();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -51,6 +63,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 var app = builder.Build();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

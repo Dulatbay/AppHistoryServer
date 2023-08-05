@@ -1,6 +1,8 @@
-﻿namespace AppHistoryServer.Models
+﻿using AppHistoryServer.Models.Interfaces;
+
+namespace AppHistoryServer.Models
 {
-    public class PassedUserTopics
+    public class PassedUserTopics : IModelId
     {
         public int Id { get; set; }
         public User User { get; set; } = null!;

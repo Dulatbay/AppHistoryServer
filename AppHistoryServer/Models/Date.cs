@@ -1,6 +1,8 @@
-﻿namespace AppHistoryServer.Models
+﻿using AppHistoryServer.Models.Interfaces;
+
+namespace AppHistoryServer.Models
 {
-    public class Date
+    public class Date : IModelId
     {
         public int Id { get; set; }
         public int DateNumber { get; set; }

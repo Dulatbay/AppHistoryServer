@@ -1,4 +1,4 @@
-﻿using AppHistoryServer.Dtos;
+﻿using AppHistoryServer.Dtos.AuthDtos;
 using AppHistoryServer.Models.Enums;
 using AppHistoryServer.Models.Interfaces;
 using System.ComponentModel.DataAnnotations;

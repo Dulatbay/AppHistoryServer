@@ -3,6 +3,7 @@ using AppHistoryServer.Dtos.QuestionDtos;
 using AppHistoryServer.Models;
 using AppHistoryServer.Models.Variant;
 using AppHistoryServer.Repositories.Interfaces;
+using AppHistoryServer.Services.BaseInterfaces;
 using AppHistoryServer.Services.Interfaces;
 using AppHistoryServer.Utils;
 
@@ -38,41 +39,11 @@ namespace AppHistoryServer.Services.Impl
             _userRepository = userRepository;
         }
 
-        private async Task SetVariants(Question question)
-        {
-            var resultVariants = new List<Variant>();
-            foreach (var variant in question.Variants)
-            {
-                if (variant == null) continue;
 
-                var existVariant = await _variantRepository.GetByIdAsync(variant.Id);
-
-                if (existVariant == null)
-                {
-                    existVariant = await _variantRepository.SaveAsync(variant);
-                }
-
-                resultVariants.Add(existVariant);
-            }
-
-            question.Variants = resultVariants;
-        }
 
         public async Task<Question> CreateAsync(QuestionPostDto questionPostDto)
         {
-            string? token = AuthUtils.GetTokenFromHeader(_contextAccessor);
-
-            if (token == null)
-                throw new UnauthorizedAccessException("Нет доступа.");
-
-            UserDto? userDto = new AuthUtils(_configuration).GetUserFromToken(token);
-
-            if (userDto == null)
-                throw new UnauthorizedAccessException("Нет доступа.");
-
-            User? author = await _userRepository.GetByIdAsync(userDto.Id);
-            if (author == null)
-                throw new UnauthorizedAccessException("Нет доступа.");
+            User author = await new AuthUtils(_configuration).GetMeUserAsync(_contextAccessor, _userRepository);
 
             Topic? topic = await _topicRepository.GetByIdAsync(questionPostDto.TopicId);
             if (topic == null)
@@ -85,7 +56,7 @@ namespace AppHistoryServer.Services.Impl
 
             Question question = new Question(questionPostDto, author, topic, archiveBook, quiz);
 
-            await this.SetVariants(question);
+            await QuestionUtils.SetVariants(question, _variantRepository);
 
             var savedQuestion = await _questionRepository.SaveAsync(question);
 
@@ -108,44 +79,30 @@ namespace AppHistoryServer.Services.Impl
 
         public async Task<Question> UpdateAsync(int id, QuestionPostDto questionPostDto)
         {
-            var existingQuestion = await _questionRepository.GetByIdAsync(id);
-            if (existingQuestion == null)
-                throw new BadHttpRequestException("Question with this Id not found.");
-
-            string? token = AuthUtils.GetTokenFromHeader(_contextAccessor);
-
-            if (token == null)
-                throw new UnauthorizedAccessException("Нет доступа.");
-
-            UserDto? userDto = new AuthUtils(_configuration).GetUserFromToken(token);
-
-            if (userDto == null || userDto.Id != existingQuestion.Id)
-                throw new UnauthorizedAccessException("Нет доступа.");
-
-            User? author = await _userRepository.GetByIdAsync(userDto.Id);
-            if (author == null)
-                throw new UnauthorizedAccessException("Нет доступа.");
-
-            Topic? topic = await _topicRepository.GetByIdAsync(questionPostDto.TopicId);
-            if (topic == null)
-                throw new BadHttpRequestException("Вопрос должен принадлежать какой-то теме!");
-
+            var existingQuestion = await QuestionUtils.CheckModelAsync(_questionRepository,
+                _contextAccessor,
+                _configuration,
+                _userRepository,
+                _topicRepository,
+                questionPostDto,
+                id);
             ArchiveBook? archiveBook = await _archiveBookRepository.GetByIdAsync(questionPostDto.ArchiveBookId);
+
             Quiz? quiz = await _quizRepository.GetByIdAsync(questionPostDto.QuizId);
 
+            Topic? topic = await _topicRepository.GetByIdAsync(questionPostDto.TopicId);
 
+            existingQuestion.QuestionText = questionPostDto.QuestionText;
+            existingQuestion.ArchiveBook = archiveBook;
+            if (topic != null)
+                existingQuestion.Topic = topic;
+            if (quiz != null)
+                existingQuestion.Quizzes.Add(quiz);
+            existingQuestion.CorrectVarianIndex = questionPostDto.CorrectVariantIndex;
+            existingQuestion.Variants = questionPostDto.Variants;
+            existingQuestion.Level = questionPostDto.Level;
 
-            Question question = new Question(questionPostDto, author, topic, archiveBook, quiz);
-
-
-
-            existingQuestion.QuestionText = question.QuestionText;
-            existingQuestion.ArchiveBook = question.ArchiveBook;
-            existingQuestion.Topic = question.Topic;
-            existingQuestion.CorrectVarianIndex = question.CorrectVarianIndex;
-            existingQuestion.Variants = question.Variants;
-
-            await this.SetVariants(existingQuestion);
+            await QuestionUtils.SetVariants(existingQuestion, _variantRepository);
 
             return (await _questionRepository.UpdateAsync(existingQuestion));
         }

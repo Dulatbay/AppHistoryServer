@@ -1,8 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using AppHistoryServer.Dtos.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
 
-namespace AppHistoryServer.Dtos
+namespace AppHistoryServer.Dtos.AuthDtos
 {
-    public class AuthResponseDto
+    public class AuthResponseDto : IDtoModel
     {
         public string? Token { get; set; }
         public UserDto User { get; set; }

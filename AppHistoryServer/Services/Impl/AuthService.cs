@@ -10,6 +10,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Security.Cryptography;
 using AppHistoryServer.Utils;
+using AppHistoryServer.Dtos.AuthDtos;
 
 namespace AppHistoryServer.Services.Impl
 {

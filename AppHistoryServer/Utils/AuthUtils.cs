@@ -1,5 +1,7 @@
 ﻿using AppHistoryServer.Dtos;
+using AppHistoryServer.Dtos.AuthDtos;
 using AppHistoryServer.Models;
+using AppHistoryServer.Repositories.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -87,6 +89,26 @@ namespace AppHistoryServer.Utils
             return null;
         }
 
+        public async Task<User> GetMeUserAsync(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
+        {
+
+            string? token = AuthUtils.GetTokenFromHeader(contextAccessor);
+
+            if (token == null)
+                throw new UnauthorizedAccessException("Нет доступа.");
+
+            UserDto? userDto = new AuthUtils(_configuration).GetUserFromToken(token);
+
+            if (userDto == null)
+                throw new UnauthorizedAccessException("Нет доступа.");
+
+            User? user = await userRepository.GetByIdAsync(userDto.Id);
+
+            if (user == null)
+                throw new UnauthorizedAccessException("Нет доступа.");
+
+            return user;
+        }
         public bool VerifyLoginDto(User? user, string enteredPassword)
         {
             if (user?.UserName == null || !this.VerifyPassword(enteredPassword, user.Password))

@@ -16,11 +16,5 @@ namespace AppHistoryServer.Repositories.Impl
         public IEnumerable<Module> GetAll() => _context.Modules;
 
         public async Task<Module?> GetByIdAsync(int id) => await _context.Modules.FirstOrDefaultAsync(m => m.Id == id);
-
-        public async Task<Module> SaveAsync(Module module) {
-            await _context.Modules.AddRangeAsync(module);
-            await _context.SaveChangesAsync();
-            return module;
-        }
     }
 }

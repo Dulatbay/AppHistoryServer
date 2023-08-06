@@ -18,6 +18,6 @@ namespace AppHistoryServer.Models
 
         [Required]
         public int Minutes { get; set; }
-
+        public int Number { get; set; }
     }
 }

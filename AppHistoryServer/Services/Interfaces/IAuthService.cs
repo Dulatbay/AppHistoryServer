@@ -1,4 +1,4 @@
-﻿using AppHistoryServer.Dtos;
+﻿using AppHistoryServer.Dtos.AuthDtos;
 using AppHistoryServer.Services.Impl;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;

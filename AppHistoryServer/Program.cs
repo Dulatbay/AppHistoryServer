@@ -25,6 +25,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IModuleService, ModuleService>();
+builder.Services.AddScoped<ITopicService, TopicService>();
+builder.Services.AddScoped<IQuizService, QuizService>();
 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IVariantRepository, VariantRepository>();

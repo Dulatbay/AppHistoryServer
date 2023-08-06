@@ -24,6 +24,11 @@ namespace AppHistoryServer.Repositories.Impl
 
         public async Task<Question?> GetByIdAsync(int id) => await _context.Questions.FirstOrDefaultAsync(x => x.Id == id);
 
+        public async Task<ICollection<Question>> GetQuestionsByTopicIdAsync(int topicId, int level)
+        {
+            return await _context.Questions.Where(x => x.Topic.Id == topicId && x.Level == level).ToListAsync();
+        }
+
         public async Task<Question> SaveAsync(Question question)
         {
             await _context.Questions.AddAsync(question);

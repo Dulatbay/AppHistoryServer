@@ -1,8 +1,9 @@
 ﻿using AppHistoryServer.Models;
+using AppHistoryServer.Models.Interfaces;
 
 namespace AppHistoryServer.Dtos.ContentDtos
 {
-    public class Node
+    public class Node : IModelId
     {
         public int Id { get; set; }
 

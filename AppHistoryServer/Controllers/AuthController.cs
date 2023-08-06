@@ -1,4 +1,4 @@
-﻿using AppHistoryServer.Dtos;
+﻿using AppHistoryServer.Dtos.AuthDtos;
 using AppHistoryServer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

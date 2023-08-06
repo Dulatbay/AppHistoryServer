@@ -3,7 +3,10 @@ using AppHistoryServer.Repositories.BaseInterfaces;
 
 namespace AppHistoryServer.Repositories.Interfaces
 {
-    public interface IQuizRepository : IGetterRepository<Quiz>
+    public interface IQuizRepository : IGetterRepository<Quiz>,
+                                       ISaverRepository<Quiz>,
+                                       IDeleterRepository<Quiz>,
+                                       IUpdaterRepository<Quiz>
     {
     }
 }

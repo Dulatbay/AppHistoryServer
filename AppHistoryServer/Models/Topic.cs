@@ -12,7 +12,7 @@ namespace AppHistoryServer.Models
         public string Title { get; set; } = null!;
 
         [Required]
-        public int number { get; set; }
+        public int Number { get; set; }
 
         [Required]
         public Module Module { get; set; } = null!;

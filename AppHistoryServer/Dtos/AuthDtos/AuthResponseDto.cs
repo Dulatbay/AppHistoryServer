@@ -1,4 +1,5 @@
 ﻿using AppHistoryServer.Dtos.Interfaces;
+using AppHistoryServer.Dtos.UserDtos;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace AppHistoryServer.Dtos.AuthDtos

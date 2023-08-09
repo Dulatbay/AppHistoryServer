@@ -1,6 +1,7 @@
 ﻿using AppHistoryServer.Dtos.ContentDtos;
 using AppHistoryServer.Models.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppHistoryServer.Models
 {
@@ -14,11 +15,13 @@ namespace AppHistoryServer.Models
         [Required]
         public int Number { get; set; }
 
-        [Required]
         public Module Module { get; set; } = null!;
+        public int ModuleId { get; set; }
 
-        [Required]
-        public Node content { get; set; } = null!;
+        public Node? Content { get; set; }
+        public int ContentId { get; set; }
+
+        
 
 
         // Relationships

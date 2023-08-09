@@ -18,12 +18,14 @@ namespace AppHistoryServer.Services.Impl
         private readonly IUserRepository _userRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IVariantRepository _variantRepository;
+        private readonly ITopicRepository _topicRepository;
         public QuizService(IQuizRepository quizRepository,
                            IHttpContextAccessor contextAccessor,
                            IConfiguration configuration,
                            IUserRepository userRepository,
                            IQuestionRepository questionRepository,
-                           IVariantRepository variantRepository)
+                           IVariantRepository variantRepository,
+                           ITopicRepository topicRepository)
         {
             _quizRepository = quizRepository;
             _contextAccessor = contextAccessor;
@@ -31,6 +33,7 @@ namespace AppHistoryServer.Services.Impl
             _userRepository = userRepository;
             _questionRepository = questionRepository;
             _variantRepository = variantRepository;
+            _topicRepository = topicRepository;
         }
 
         public async Task<Quiz> CreateAsync(QuizPostDto model)
@@ -39,16 +42,18 @@ namespace AppHistoryServer.Services.Impl
             
             User user = await new AuthUtils(_configuration).GetMeUserAsync(_contextAccessor, _userRepository);
 
+
             Quiz quiz = new Quiz()
             {
                 Title = model.Title,
                 Description = model.Description,
                 Level = model.Level,
-                Questions = model.Questions,
                 AuthorId = user.Id,
                 IsVerified = false
             };
 
+            quiz.Questions = await QuizUtils.SetQuestionsAsync(model, _questionRepository, _variantRepository, user,_topicRepository);
+            
             return await _quizRepository.SaveAsync(quiz);
         }
 

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AppHistoryServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230805073842_3")]
-    partial class _3
+    [Migration("20230809110739_.")]
+    partial class _
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,29 +36,15 @@ namespace AppHistoryServer.Migrations
                     b.Property<int>("Component")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TopicId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TopicId")
+                        .IsUnique();
 
                     b.ToTable("Node");
-                });
-
-            modelBuilder.Entity("AppHistoryServer.Dtos.ContentDtos.Variant.Variant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Index")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Variant");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.ArchiveBook", b =>
@@ -89,7 +75,7 @@ namespace AppHistoryServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ArchiveBook");
+                    b.ToTable("ArchiveBooks");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.Date", b =>
@@ -133,6 +119,9 @@ namespace AppHistoryServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Minutes")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Number")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
@@ -236,6 +225,9 @@ namespace AppHistoryServer.Migrations
                     b.Property<int>("CorrectVarianIndex")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
                     b.Property<string>("QuestionText")
                         .IsRequired()
                         .HasColumnType("text");
@@ -251,7 +243,7 @@ namespace AppHistoryServer.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.Quiz", b =>
@@ -276,7 +268,7 @@ namespace AppHistoryServer.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("Number")
+                    b.Property<int>("Level")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
@@ -287,7 +279,7 @@ namespace AppHistoryServer.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("Quiz");
+                    b.ToTable("Quizzes");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.Term", b =>
@@ -323,26 +315,24 @@ namespace AppHistoryServer.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ContentId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ModuleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Number")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("contentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("number")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ModuleId");
 
-                    b.HasIndex("contentId");
-
-                    b.ToTable("Topic");
+                    b.ToTable("Topics");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.User", b =>
@@ -365,7 +355,7 @@ namespace AppHistoryServer.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("LastPlay")
+                    b.Property<DateTime?>("LastPlay")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("LastTopicId")
@@ -392,6 +382,23 @@ namespace AppHistoryServer.Migrations
                     b.HasIndex("LastTopicId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("AppHistoryServer.Models.Variant.Variant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Variants");
                 });
 
             modelBuilder.Entity("PassedUserQuestionsPassedUserQuizzes", b =>
@@ -452,6 +459,17 @@ namespace AppHistoryServer.Migrations
                     b.HasIndex("FavoritedQuizzesId");
 
                     b.ToTable("FavoritedUserQuizzes", (string)null);
+                });
+
+            modelBuilder.Entity("AppHistoryServer.Dtos.ContentDtos.Node", b =>
+                {
+                    b.HasOne("AppHistoryServer.Models.Topic", "Topic")
+                        .WithOne("Content")
+                        .HasForeignKey("AppHistoryServer.Dtos.ContentDtos.Node", "TopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.Date", b =>
@@ -572,20 +590,12 @@ namespace AppHistoryServer.Migrations
             modelBuilder.Entity("AppHistoryServer.Models.Topic", b =>
                 {
                     b.HasOne("AppHistoryServer.Models.Module", "Module")
-                        .WithMany()
+                        .WithMany("Topics")
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppHistoryServer.Dtos.ContentDtos.Node", "content")
-                        .WithMany()
-                        .HasForeignKey("contentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Module");
-
-                    b.Navigation("content");
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.User", b =>
@@ -635,7 +645,7 @@ namespace AppHistoryServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppHistoryServer.Dtos.ContentDtos.Variant.Variant", null)
+                    b.HasOne("AppHistoryServer.Models.Variant.Variant", null)
                         .WithMany()
                         .HasForeignKey("VariantsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -662,6 +672,11 @@ namespace AppHistoryServer.Migrations
                     b.Navigation("Questions");
                 });
 
+            modelBuilder.Entity("AppHistoryServer.Models.Module", b =>
+                {
+                    b.Navigation("Topics");
+                });
+
             modelBuilder.Entity("AppHistoryServer.Models.Question", b =>
                 {
                     b.Navigation("PassedUserQuestions");
@@ -674,6 +689,8 @@ namespace AppHistoryServer.Migrations
 
             modelBuilder.Entity("AppHistoryServer.Models.Topic", b =>
                 {
+                    b.Navigation("Content");
+
                     b.Navigation("Dates");
 
                     b.Navigation("PassedUserTopics");

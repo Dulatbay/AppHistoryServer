@@ -1,8 +1,10 @@
 ﻿using AppHistoryServer.Dtos.QuestionDtos;
 using AppHistoryServer.Dtos.QuizDtos;
+using AppHistoryServer.Models;
 using AppHistoryServer.Services.Impl;
 using AppHistoryServer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AppHistoryServer.Controllers
 {
@@ -22,12 +24,13 @@ namespace AppHistoryServer.Controllers
         {
             try
             {
-                return Ok(_quizService.GetAll());
+                return Ok(JsonConvert.SerializeObject(_quizService.GetAll()));
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
             }
         }
 
@@ -43,8 +46,9 @@ namespace AppHistoryServer.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
             }
         }
 
@@ -66,8 +70,10 @@ namespace AppHistoryServer.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
+
             }
         }
 

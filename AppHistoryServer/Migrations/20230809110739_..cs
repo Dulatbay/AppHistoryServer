@@ -12,73 +12,8 @@ namespace AppHistoryServer.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Question_Module_ModuleId",
-                table: "Question");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Topic_Module_ModuleId",
-                table: "Topic");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Module",
-                table: "Module");
-
-            migrationBuilder.RenameTable(
-                name: "Module",
-                newName: "Modules");
-
-            migrationBuilder.RenameColumn(
-                name: "ModuleId",
-                table: "Question",
-                newName: "ArchiveBookId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Question_ModuleId",
-                table: "Question",
-                newName: "IX_Question_ArchiveBookId");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "createAt",
-                table: "Users",
-                type: "timestamp with time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "AuthorId",
-                table: "Question",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<int>(
-                name: "CorrectVarianIndex",
-                table: "Question",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<string>(
-                name: "QuestionText",
-                table: "Question",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<int>(
-                name: "TopicId",
-                table: "Question",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Modules",
-                table: "Modules",
-                column: "Id");
-
             migrationBuilder.CreateTable(
-                name: "ArchiveBook",
+                name: "ArchiveBooks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -91,7 +26,59 @@ namespace AppHistoryServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ArchiveBook", x => x.Id);
+                    table.PrimaryKey("PK_ArchiveBooks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Modules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    Minutes = table.Column<int>(type: "integer", nullable: false),
+                    Number = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Modules", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Variants",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Content = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Variants", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Topics",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Number = table.Column<int>(type: "integer", nullable: false),
+                    ModuleId = table.Column<int>(type: "integer", nullable: false),
+                    ContentId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Topics", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Topics_Modules_ModuleId",
+                        column: x => x.ModuleId,
+                        principalTable: "Modules",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -108,87 +95,29 @@ namespace AppHistoryServer.Migrations
                 {
                     table.PrimaryKey("PK_Dates", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Dates_Topic_TopicId",
+                        name: "FK_Dates_Topics_TopicId",
                         column: x => x.TopicId,
-                        principalTable: "Topic",
+                        principalTable: "Topics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PassedUserQuestions",
+                name: "Node",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    QuestionId = table.Column<int>(type: "integer", nullable: false),
-                    ChooseIndex = table.Column<int>(type: "integer", nullable: false)
+                    Component = table.Column<int>(type: "integer", nullable: false),
+                    TopicId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PassedUserQuestions", x => x.Id);
+                    table.PrimaryKey("PK_Node", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PassedUserQuestions_Question_QuestionId",
-                        column: x => x.QuestionId,
-                        principalTable: "Question",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PassedUserQuestions_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PassedUserTopics",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    TopicId = table.Column<int>(type: "integer", nullable: false),
-                    PassedPercent = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PassedUserTopics", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PassedUserTopics_Topic_TopicId",
+                        name: "FK_Node_Topics_TopicId",
                         column: x => x.TopicId,
-                        principalTable: "Topic",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PassedUserTopics_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Quiz",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    AuthorId = table.Column<int>(type: "integer", nullable: false),
-                    IsVerified = table.Column<bool>(type: "boolean", nullable: false),
-                    Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Quiz", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Quiz_Users_AuthorId",
-                        column: x => x.AuthorId,
-                        principalTable: "Users",
+                        principalTable: "Topics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -207,25 +136,174 @@ namespace AppHistoryServer.Migrations
                 {
                     table.PrimaryKey("PK_Term", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Term_Topic_TopicId",
+                        name: "FK_Term_Topics_TopicId",
                         column: x => x.TopicId,
-                        principalTable: "Topic",
+                        principalTable: "Topics",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Variant",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    Index = table.Column<int>(type: "integer", nullable: false)
+                    UserName = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    ShockDay = table.Column<int>(type: "integer", nullable: false),
+                    League = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    LastPlay = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ImageUrl = table.Column<string>(type: "text", nullable: true),
+                    LastTopicId = table.Column<int>(type: "integer", nullable: true),
+                    CreateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Variant", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Topics_LastTopicId",
+                        column: x => x.LastTopicId,
+                        principalTable: "Topics",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PassedUserTopics",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    TopicId = table.Column<int>(type: "integer", nullable: false),
+                    PassedPercent = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PassedUserTopics", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PassedUserTopics_Topics_TopicId",
+                        column: x => x.TopicId,
+                        principalTable: "Topics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PassedUserTopics_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Questions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    QuestionText = table.Column<string>(type: "text", nullable: false),
+                    CorrectVarianIndex = table.Column<int>(type: "integer", nullable: false),
+                    TopicId = table.Column<int>(type: "integer", nullable: false),
+                    AuthorId = table.Column<int>(type: "integer", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    ArchiveBookId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Questions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Questions_ArchiveBooks_ArchiveBookId",
+                        column: x => x.ArchiveBookId,
+                        principalTable: "ArchiveBooks",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Questions_Topics_TopicId",
+                        column: x => x.TopicId,
+                        principalTable: "Topics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Questions_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Quizzes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    AuthorId = table.Column<int>(type: "integer", nullable: false),
+                    IsVerified = table.Column<bool>(type: "boolean", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Quizzes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Quizzes_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PassedUserQuestions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    QuestionId = table.Column<int>(type: "integer", nullable: false),
+                    ChooseIndex = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PassedUserQuestions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PassedUserQuestions_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PassedUserQuestions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuestionVariant",
+                columns: table => new
+                {
+                    QuestionsId = table.Column<int>(type: "integer", nullable: false),
+                    VariantsId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionVariant", x => new { x.QuestionsId, x.VariantsId });
+                    table.ForeignKey(
+                        name: "FK_QuestionVariant_Questions_QuestionsId",
+                        column: x => x.QuestionsId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_QuestionVariant_Variants_VariantsId",
+                        column: x => x.VariantsId,
+                        principalTable: "Variants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -239,9 +317,9 @@ namespace AppHistoryServer.Migrations
                 {
                     table.PrimaryKey("PK_FavoritedUserQuizzes", x => new { x.AddedFavoritedUsersId, x.FavoritedQuizzesId });
                     table.ForeignKey(
-                        name: "FK_FavoritedUserQuizzes_Quiz_FavoritedQuizzesId",
+                        name: "FK_FavoritedUserQuizzes_Quizzes_FavoritedQuizzesId",
                         column: x => x.FavoritedQuizzesId,
-                        principalTable: "Quiz",
+                        principalTable: "Quizzes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -265,9 +343,9 @@ namespace AppHistoryServer.Migrations
                 {
                     table.PrimaryKey("PK_PassedUserQuizzes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PassedUserQuizzes_Quiz_QuizId",
+                        name: "FK_PassedUserQuizzes_Quizzes_QuizId",
                         column: x => x.QuizId,
-                        principalTable: "Quiz",
+                        principalTable: "Quizzes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -289,39 +367,15 @@ namespace AppHistoryServer.Migrations
                 {
                     table.PrimaryKey("PK_QuestionQuiz", x => new { x.QuestionsId, x.QuizzesId });
                     table.ForeignKey(
-                        name: "FK_QuestionQuiz_Question_QuestionsId",
+                        name: "FK_QuestionQuiz_Questions_QuestionsId",
                         column: x => x.QuestionsId,
-                        principalTable: "Question",
+                        principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_QuestionQuiz_Quiz_QuizzesId",
+                        name: "FK_QuestionQuiz_Quizzes_QuizzesId",
                         column: x => x.QuizzesId,
-                        principalTable: "Quiz",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "QuestionVariant",
-                columns: table => new
-                {
-                    QuestionsId = table.Column<int>(type: "integer", nullable: false),
-                    VariantsId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestionVariant", x => new { x.QuestionsId, x.VariantsId });
-                    table.ForeignKey(
-                        name: "FK_QuestionVariant_Question_QuestionsId",
-                        column: x => x.QuestionsId,
-                        principalTable: "Question",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_QuestionVariant_Variant_VariantsId",
-                        column: x => x.VariantsId,
-                        principalTable: "Variant",
+                        principalTable: "Quizzes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -351,16 +405,6 @@ namespace AppHistoryServer.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Question_AuthorId",
-                table: "Question",
-                column: "AuthorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Question_TopicId",
-                table: "Question",
-                column: "TopicId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Dates_TopicId",
                 table: "Dates",
                 column: "TopicId");
@@ -369,6 +413,12 @@ namespace AppHistoryServer.Migrations
                 name: "IX_FavoritedUserQuizzes_FavoritedQuizzesId",
                 table: "FavoritedUserQuizzes",
                 column: "FavoritedQuizzesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Node_TopicId",
+                table: "Node",
+                column: "TopicId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PassedUserQuestions_QuestionId",
@@ -411,13 +461,28 @@ namespace AppHistoryServer.Migrations
                 column: "QuizzesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Questions_ArchiveBookId",
+                table: "Questions",
+                column: "ArchiveBookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_AuthorId",
+                table: "Questions",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_TopicId",
+                table: "Questions",
+                column: "TopicId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuestionVariant_VariantsId",
                 table: "QuestionVariant",
                 column: "VariantsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Quiz_AuthorId",
-                table: "Quiz",
+                name: "IX_Quizzes_AuthorId",
+                table: "Quizzes",
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
@@ -425,65 +490,28 @@ namespace AppHistoryServer.Migrations
                 table: "Term",
                 column: "TopicId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Question_ArchiveBook_ArchiveBookId",
-                table: "Question",
-                column: "ArchiveBookId",
-                principalTable: "ArchiveBook",
-                principalColumn: "Id");
+            migrationBuilder.CreateIndex(
+                name: "IX_Topics_ModuleId",
+                table: "Topics",
+                column: "ModuleId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Question_Topic_TopicId",
-                table: "Question",
-                column: "TopicId",
-                principalTable: "Topic",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Question_Users_AuthorId",
-                table: "Question",
-                column: "AuthorId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Topic_Modules_ModuleId",
-                table: "Topic",
-                column: "ModuleId",
-                principalTable: "Modules",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_LastTopicId",
+                table: "Users",
+                column: "LastTopicId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Question_ArchiveBook_ArchiveBookId",
-                table: "Question");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Question_Topic_TopicId",
-                table: "Question");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Question_Users_AuthorId",
-                table: "Question");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Topic_Modules_ModuleId",
-                table: "Topic");
-
-            migrationBuilder.DropTable(
-                name: "ArchiveBook");
-
             migrationBuilder.DropTable(
                 name: "Dates");
 
             migrationBuilder.DropTable(
                 name: "FavoritedUserQuizzes");
+
+            migrationBuilder.DropTable(
+                name: "Node");
 
             migrationBuilder.DropTable(
                 name: "PassedUserQuestionsPassedUserQuizzes");
@@ -507,76 +535,25 @@ namespace AppHistoryServer.Migrations
                 name: "PassedUserQuizzes");
 
             migrationBuilder.DropTable(
-                name: "Variant");
+                name: "Variants");
 
             migrationBuilder.DropTable(
-                name: "Quiz");
+                name: "Questions");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Question_AuthorId",
-                table: "Question");
+            migrationBuilder.DropTable(
+                name: "Quizzes");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Question_TopicId",
-                table: "Question");
+            migrationBuilder.DropTable(
+                name: "ArchiveBooks");
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Modules",
-                table: "Modules");
+            migrationBuilder.DropTable(
+                name: "Users");
 
-            migrationBuilder.DropColumn(
-                name: "createAt",
-                table: "Users");
+            migrationBuilder.DropTable(
+                name: "Topics");
 
-            migrationBuilder.DropColumn(
-                name: "AuthorId",
-                table: "Question");
-
-            migrationBuilder.DropColumn(
-                name: "CorrectVarianIndex",
-                table: "Question");
-
-            migrationBuilder.DropColumn(
-                name: "QuestionText",
-                table: "Question");
-
-            migrationBuilder.DropColumn(
-                name: "TopicId",
-                table: "Question");
-
-            migrationBuilder.RenameTable(
-                name: "Modules",
-                newName: "Module");
-
-            migrationBuilder.RenameColumn(
-                name: "ArchiveBookId",
-                table: "Question",
-                newName: "ModuleId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Question_ArchiveBookId",
-                table: "Question",
-                newName: "IX_Question_ModuleId");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Module",
-                table: "Module",
-                column: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Question_Module_ModuleId",
-                table: "Question",
-                column: "ModuleId",
-                principalTable: "Module",
-                principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Topic_Module_ModuleId",
-                table: "Topic",
-                column: "ModuleId",
-                principalTable: "Module",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.DropTable(
+                name: "Modules");
         }
     }
 }

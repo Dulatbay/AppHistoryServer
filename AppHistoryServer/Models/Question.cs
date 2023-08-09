@@ -1,5 +1,6 @@
 ﻿using AppHistoryServer.Dtos.QuestionDtos;
 using AppHistoryServer.Models.Interfaces;
+using Newtonsoft.Json;
 
 namespace AppHistoryServer.Models
 {
@@ -7,24 +8,32 @@ namespace AppHistoryServer.Models
     {
         public int Id { get; set; }
 
-        public string QuestionText { get; set; } = null!;
+        public string? QuestionText { get; set; }
 
-        // Variants can be ImageQuestion or TextQuestion
-        public ICollection<Variant.Variant> Variants { get; set; } = null!;
+        public ICollection<Variant.Variant>? Variants { get; set; }
 
         public int CorrectVarianIndex { get; set; }
 
-        public Topic Topic { get; set; } = null!;
+        [JsonIgnore]
+        public Topic? Topic { get; set; }
 
-        public User Author { get; set; } = null!;
+        public int TopicId { get; set; }
+
+        [JsonIgnore]
+        public User? Author { get; set; }
+
         public int Level { get; set; }
 
         // the question may be in some test
-        public ArchiveBook? ArchiveBook { get; set; } = null!;
 
-        public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
+        [JsonIgnore]
+        public ArchiveBook? ArchiveBook { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Quiz>? Quizzes { get; set; }
+        
+        [JsonIgnore]
         public ICollection<PassedUserQuestions>? PassedUserQuestions { get; set; }
-
 
         public Question()
         {

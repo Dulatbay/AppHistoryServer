@@ -1,4 +1,5 @@
-﻿using AppHistoryServer.Models;
+﻿using AppHistoryServer.Dtos.ContentDtos;
+using AppHistoryServer.Models;
 using AppHistoryServer.Models.Enums;
 using AppHistoryServer.Models.Variant;
 using AppHistoryServer.Utils.Initializer;
@@ -14,16 +15,18 @@ namespace AppHistoryServer
         public DbSet<Date> Dates { get; set; }
         public DbSet<Variant> Variants { get; set; }
         public DbSet<Question> Questions { get; set; }
-        public DbSet<Topic> Topics{ get; set; }
-        public DbSet<ArchiveBook> ArchiveBooks{ get; set; }
-        public DbSet<Quiz> Quizzes{ get; set; }
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<ArchiveBook> ArchiveBooks { get; set; }
+        public DbSet<Quiz> Quizzes { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
            : base(options)
         {
-            Database.EnsureDeleted();
-            Database.EnsureCreated();
+            //Database.EnsureDeleted();
+
+            //Database.EnsureCreated();
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -35,6 +38,23 @@ namespace AppHistoryServer
                     .HasOne(c => c.Author)
                     .WithMany(c => c.CreatedQuizzes)
                     .HasForeignKey(c => c.AuthorId);
+
+            modelBuilder.Entity<Topic>()
+                    .HasOne(c => c.Module)
+                    .WithMany(c => c.Topics)
+                    .HasForeignKey(c => c.ModuleId);
+
+            modelBuilder.Entity<Question>()
+                    .HasOne(c => c.Topic)
+                    .WithMany(c => c.Questions)
+                    .HasForeignKey(c => c.TopicId);
+
+
+
+            modelBuilder.Entity<Topic>()
+                .HasOne(t => t.Content)
+                .WithOne(c => c.Topic)
+                .HasForeignKey<Node>(c => c.TopicId);
 
 
             modelBuilder.Entity<Quiz>()
@@ -50,7 +70,10 @@ namespace AppHistoryServer
             .HasDefaultValue(League.LittleBoy);
 
 
-            UserInitializer.Initialize(modelBuilder);
+            ModuleInitializer.Initialize(modelBuilder);
+           
+
+
 
         }
     }

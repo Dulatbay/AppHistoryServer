@@ -3,6 +3,7 @@ using AppHistoryServer.Models;
 using AppHistoryServer.Services.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -29,7 +30,8 @@ namespace AppHistoryServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
+
             }
         }
 
@@ -47,7 +49,8 @@ namespace AppHistoryServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
+
             }
         }
 
@@ -67,10 +70,15 @@ namespace AppHistoryServer.Controllers
             {
                 return Unauthorized(new { message = ex.Message });
             }
+            catch(SecurityTokenExpiredException ex)
+            {
+                return Unauthorized(new { message = "Срок действия токена истек"});
+            }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500,"Неизвестная ошибка, повторите попытку позже...");
             }
         }
 
@@ -93,7 +101,8 @@ namespace AppHistoryServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
+
             }
         }
 
@@ -113,7 +122,7 @@ namespace AppHistoryServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
             }
         }
     }

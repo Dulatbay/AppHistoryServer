@@ -1,16 +1,10 @@
-﻿using AppHistoryServer.Dtos;
-using AppHistoryServer.Models;
+﻿using AppHistoryServer.Models;
 using AppHistoryServer.Repositories.Interfaces;
 using AppHistoryServer.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Security.Cryptography;
 using AppHistoryServer.Utils;
 using AppHistoryServer.Dtos.AuthDtos;
+using AppHistoryServer.Dtos.UserDtos;
 
 namespace AppHistoryServer.Services.Impl
 {
@@ -33,13 +27,14 @@ namespace AppHistoryServer.Services.Impl
 
         public async Task<AuthResponseDto> Register(RegisterDto registerDto)
         {
+
+            if (!_authUtils.VerifyRegisterDto(registerDto))
+                throw new BadHttpRequestException("Не корректные данные");
+
             var user = await _userRepository.GetUserByEmailAsync(registerDto.Email);
 
             if (user != null)
                 throw new BadHttpRequestException("Такой логин уже существует");
-
-            if (!_authUtils.VerifyRegisterDto(registerDto))
-                throw new BadHttpRequestException("Не корректные данные");
 
             registerDto.Password = _authUtils.HashPassword(registerDto.Password);
 
@@ -65,6 +60,7 @@ namespace AppHistoryServer.Services.Impl
         public async Task<AuthResponseDto> GetMe()
         {
             var token = AuthUtils.GetTokenFromHeader(_contextAccessor);
+
             if (token == null)
                 throw new UnauthorizedAccessException();
 

@@ -1,8 +1,9 @@
 ﻿using AppHistoryServer.Models;
+using AppHistoryServer.Models.Interfaces;
 
-namespace AppHistoryServer.Dtos
+namespace AppHistoryServer.Dtos.UserDtos
 {
-    public class UserDto
+    public class UserDto : IModelId
     {
         public int Id { get; set; }
         public string? UserName { get; set; }

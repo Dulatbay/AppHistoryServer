@@ -2,8 +2,8 @@
 using AppHistoryServer.Models;
 using AppHistoryServer.Repositories.Interfaces;
 using AppHistoryServer.Dtos.QuestionDtos;
-using AppHistoryServer.Dtos;
 using AppHistoryServer.Repositories.Impl;
+using AppHistoryServer.Dtos.UserDtos;
 
 namespace AppHistoryServer.Utils
 {

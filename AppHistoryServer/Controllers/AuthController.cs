@@ -15,7 +15,7 @@ namespace AppHistoryServer.Controllers
             _authService = authService;
         }
 
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
             try
@@ -33,7 +33,7 @@ namespace AppHistoryServer.Controllers
             }
         }
 
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             try
@@ -50,7 +50,7 @@ namespace AppHistoryServer.Controllers
                 return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
             }
         }
-        [HttpGet("/me")]
+        [HttpGet("me")]
         public async Task<IActionResult> GetMe()
         {
             try
@@ -59,12 +59,22 @@ namespace AppHistoryServer.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return Unauthorized();
+                return Unauthorized(new { message = "Не валидный токен."});
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { message = "Неизвестная ошибка, повторите попытку." });
+            }
+            catch (ArgumentException)
+            {
+                return Unauthorized(new { message = "Не валидный токен." });
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
+                Console.WriteLine(ex.ToString());
+                return StatusCode(500, new { message = "Неизвестная ошибка, повторите попытку." });
             }
         }
 

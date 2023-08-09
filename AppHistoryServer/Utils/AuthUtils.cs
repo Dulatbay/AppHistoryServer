@@ -1,5 +1,5 @@
-﻿using AppHistoryServer.Dtos;
-using AppHistoryServer.Dtos.AuthDtos;
+﻿using AppHistoryServer.Dtos.AuthDtos;
+using AppHistoryServer.Dtos.UserDtos;
 using AppHistoryServer.Models;
 using AppHistoryServer.Repositories.Interfaces;
 using Microsoft.IdentityModel.Tokens;
@@ -25,8 +25,7 @@ namespace AppHistoryServer.Utils
                 {
                     new Claim("id", user.Id.ToString()),
                     new Claim("userName", user.UserName),
-                    new Claim("email", user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("emailAddress", user.Email),
                 };
 
             var key = _configuration["JWT:Secret"];
@@ -57,6 +56,8 @@ namespace AppHistoryServer.Utils
 
             var validationParameters = new TokenValidationParameters
             {
+                ValidateAudience = false,
+                ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
             };
@@ -70,7 +71,7 @@ namespace AppHistoryServer.Utils
 
             var userId = claimsPrincipal.FindFirstValue("id");
             var userName = claimsPrincipal.FindFirstValue("userName");
-            var email = claimsPrincipal.FindFirstValue("email");
+            var email = claimsPrincipal.FindFirstValue("emailAddress");
 
             if (userId != null && userName != null && email != null)
             {
@@ -140,7 +141,9 @@ namespace AppHistoryServer.Utils
             if (context.Request.Headers.TryGetValue("Authorization", out var authHeaderValue))
             {
                 string authorizationValue = authHeaderValue.ToString();
-                return authorizationValue;
+                if (authorizationValue == "Bearer undefined")
+                    return null;
+                return authorizationValue.Substring("Bearer ".Length);
             }
             return null;
         }
@@ -152,19 +155,19 @@ namespace AppHistoryServer.Utils
         {
             return BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash);
         }
-        private bool IsPassword(string password)
+        private bool IsPassword(string? password)
         {
-            if (password.Length < 3) return false;
+            if (password == null || password.Length < 3) return false;
             return true;
         }
-        private bool IsEmail(string email)
+        private bool IsEmail(string? email)
         {
-            if (!email.Contains("@")) return false;
+            if (email == null || !email.Contains("@")) return false;
             return true;
         }
-        private bool IsUserName(string userName)
+        private bool IsUserName(string? userName)
         {
-            if (userName.Length < 3) return false;
+            if (userName == null || userName.Length < 3) return false;
             return true;
         }
     }

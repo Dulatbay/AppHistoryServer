@@ -3,7 +3,7 @@ using AppHistoryServer.Services.BaseInterfaces;
 
 namespace AppHistoryServer.Services.Interfaces
 {
-    public interface IModuleService : IGetterService<Module>
+    public interface IModuleService : IGetterService<ModelD,Module>
     {
     }
 }

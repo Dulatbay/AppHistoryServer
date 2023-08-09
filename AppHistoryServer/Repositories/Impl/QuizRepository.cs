@@ -13,9 +13,15 @@ namespace AppHistoryServer.Repositories.Impl
             _context = context;
         }
 
-        public IEnumerable<Quiz> GetAll() => _context.Quizzes;
+        public IEnumerable<Quiz> GetAll()
+        {
+            var res = _context.Quizzes?.Include(q => q.Questions)
+                .ThenInclude(q => q.Variants)
+                .ToList();
+            return res ?? new List<Quiz>();
+        }
 
-        public async Task<Quiz?> GetByIdAsync(int id) => await _context.Quizzes.FirstOrDefaultAsync(x => x.Id == id);
+        public async Task<Quiz?> GetByIdAsync(int id) => await _context.Quizzes.Include(q => q.Questions).FirstOrDefaultAsync(x => x.Id == id);
 
         public async Task<Quiz> DeleteAsync(Quiz model)
         {

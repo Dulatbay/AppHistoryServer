@@ -9,9 +9,11 @@ namespace AppHistoryServer.Models
         public int Id { get; set; }
 
         public string? QuestionText { get; set; }
-
+        
         public ICollection<Variant.Variant>? Variants { get; set; }
 
+
+        [JsonProperty("correctVariantIndex")]
         public int CorrectVarianIndex { get; set; }
 
         [JsonIgnore]

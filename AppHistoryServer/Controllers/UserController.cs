@@ -48,5 +48,37 @@ namespace AppHistoryServer.Controllers
             }
         }
 
+        [HttpGet("me/shock-days")]
+        public async Task<IActionResult> GetMeShockDaysCount()
+        {
+            try
+            {
+                return Ok(await _userService.GetMeShockDaysAsync());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
+            }
+        }
+
+        [HttpGet("user-card/{id}")]
+        public async Task<IActionResult> GetUserCardById(int id)
+        {
+            try
+            {
+                return Ok(await _userService.GetUserCardByIdAsync(id));
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
+            }
+        }
+
     }
 }

@@ -1,18 +1,30 @@
-﻿using AppHistoryServer.Models;
-using AppHistoryServer.Models.Interfaces;
+﻿using AppHistoryServer.Dtos.Interfaces;
+using AppHistoryServer.Models;
 
 namespace AppHistoryServer.Dtos.UserDtos
 {
-    public class UserDto : IModelId
+    public class UserDto : IDtoModel
     {
         public int Id { get; set; }
-        public string? UserName { get; set; }
+        public string? Username { get; set; }
         public string? Email { get; set; }
-        public UserDto(User user)
+        public UserDto(User? user)
         {
+            if(user == null) throw new ArgumentNullException(nameof(user));
             Id = user.Id;
-            UserName = user.UserName;
+            Username = user.Username;
             Email = user.Email;
+        }
+
+        public static IEnumerable<UserDto> GetAll(IEnumerable<User>? users)
+        {
+            if (users == null)
+                yield break;
+
+            foreach (var user in users)
+            {
+                yield return new UserDto(user);
+            }
         }
     }
 }

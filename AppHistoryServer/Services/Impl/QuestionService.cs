@@ -41,9 +41,9 @@ namespace AppHistoryServer.Services.Impl
 
 
 
-        public async Task<Question> CreateAsync(QuestionPostDto questionPostDto)
+        public async Task<QuestionDto> CreateAsync(QuestionPostDto questionPostDto)
         {
-            User author = await new AuthUtils(_configuration).GetMeUserAsync(_contextAccessor, _userRepository);
+            User author = await new AuthUtils(_configuration).GetMeRequiredUserAsync(_contextAccessor, _userRepository);
 
             Topic? topic = await _topicRepository.GetByIdAsync(questionPostDto.TopicId);
             if (topic == null)
@@ -60,24 +60,24 @@ namespace AppHistoryServer.Services.Impl
 
             var savedQuestion = await _questionRepository.SaveAsync(question);
 
-            return savedQuestion;
+            return new QuestionDto(savedQuestion);
         }
 
-        public async Task<Question> DeleteAsync(int id)
+        public async Task<QuestionDto> DeleteAsync(int id)
         {
             var toRemove = await _questionRepository.GetByIdAsync(id);
             if (toRemove == null)
                 throw new BadHttpRequestException("Question with this Id not found.");
 
             var removed = await _questionRepository.DeleteAsync(toRemove);
-            return removed;
+            return new QuestionDto(removed);
         }
 
-        public IEnumerable<Question> GetAll() => _questionRepository.GetAll();
+        public IEnumerable<QuestionDto> GetAll() => QuestionDto.GetAll(_questionRepository.GetAll());
 
-        public Task<Question?> GetByIdAsync(int id) => _questionRepository.GetByIdAsync(id);
+        public async Task<QuestionDto?> GetByIdAsync(int id) => new QuestionDto(await _questionRepository.GetByIdAsync(id));
 
-        public async Task<Question> UpdateAsync(int id, QuestionPostDto questionPostDto)
+        public async Task<QuestionDto> UpdateAsync(int id, QuestionPostDto questionPostDto)
         {
             var existingQuestion = await QuestionUtils.CheckModelAsync(_questionRepository,
                 _contextAccessor,
@@ -97,14 +97,17 @@ namespace AppHistoryServer.Services.Impl
             if (topic != null)
                 existingQuestion.Topic = topic;
             if (quiz != null)
+            {
+                if(existingQuestion.Quizzes==null) existingQuestion.Quizzes = new List<Quiz>();
                 existingQuestion.Quizzes.Add(quiz);
+            }
             existingQuestion.CorrectVarianIndex = questionPostDto.CorrectVariantIndex;
             existingQuestion.Variants = questionPostDto.Variants;
             existingQuestion.Level = questionPostDto.Level;
 
             await QuestionUtils.SetVariants(existingQuestion, _variantRepository);
 
-            return (await _questionRepository.UpdateAsync(existingQuestion));
+            return new QuestionDto(await _questionRepository.UpdateAsync(existingQuestion));
         }
     }
 }

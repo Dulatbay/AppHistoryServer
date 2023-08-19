@@ -1,4 +1,5 @@
-﻿using AppHistoryServer.Services.Interfaces;
+﻿using AppHistoryServer.Services.Impl;
+using AppHistoryServer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -16,6 +17,27 @@ namespace AppHistoryServer.Controllers
             _moduleService = moduleService;
         }
 
+        [HttpGet("get-titles")]
+        public IActionResult GetAllModuleTopicsTitle()
+        {
+            try
+            {
+                var result = _moduleService.GetAllModuleTopicsTitle();
+                if (result == null)
+                    return Ok(new { });
+                return Ok(result);
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку.");
+            }
+        }
+
         [HttpGet]
         public IActionResult Get()
         {
@@ -26,7 +48,7 @@ namespace AppHistoryServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500,"Неизвестная ошибка, повторите попытку позже...");
             }
         }
 
@@ -44,7 +66,7 @@ namespace AppHistoryServer.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return BadRequest("Неизвестная ошибка, повторите попытку позже...");
+                return StatusCode(500, "Неизвестная ошибка, повторите попытку позже...");
             }
         }
     }

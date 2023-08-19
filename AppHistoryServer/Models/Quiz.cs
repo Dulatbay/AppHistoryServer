@@ -9,19 +9,17 @@ namespace AppHistoryServer.Models
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
         
-        [JsonIgnore]
-        public User Author { get; set; } = null!;
+        public User? Author { get; set; }
         public int AuthorId { get; set; }
         public bool IsVerified { get; set; }
         public int Level { get; set; }
+        public string? ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public ICollection<Question>? Questions { get; set; }
+        public IList<Question> Questions { get; set; } = new List<Question>();
         
-        [JsonIgnore]
-        public ICollection<User>? AddedFavoritedUsers { get; set; }
+        public ICollection<User> AddedFavoritedUsers { get; set; } = new List<User>();
         
-        [JsonIgnore]
-        public ICollection<PassedUserQuizzes>? PassedUserQuizzes { get; set; }
+        public ICollection<PassedUserQuizzes> PassedUserQuizzes { get; set; } = new List<PassedUserQuizzes>();
     }
 }

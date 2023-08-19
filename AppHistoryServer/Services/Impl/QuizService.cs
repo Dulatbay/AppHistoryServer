@@ -1,11 +1,9 @@
-﻿using AppHistoryServer.Dtos;
-using AppHistoryServer.Dtos.QuizDtos;
+﻿using AppHistoryServer.Dtos.QuizDtos;
+using AppHistoryServer.Dtos.UserDtos;
 using AppHistoryServer.Models;
-using AppHistoryServer.Repositories.Impl;
 using AppHistoryServer.Repositories.Interfaces;
 using AppHistoryServer.Services.Interfaces;
 using AppHistoryServer.Utils;
-using Microsoft.AspNetCore.Http;
 using NuGet.Packaging;
 
 namespace AppHistoryServer.Services.Impl
@@ -19,13 +17,20 @@ namespace AppHistoryServer.Services.Impl
         private readonly IQuestionRepository _questionRepository;
         private readonly IVariantRepository _variantRepository;
         private readonly ITopicRepository _topicRepository;
+        private readonly IFileService _fileService;
+        private readonly IPassedUserQuestionsRepository _passedUserQuestionsRepository;
+        private readonly IPassedUserQuizzesRepository _passedUserQuizzesRepository;
+        private readonly AuthUtils _authUtils;
         public QuizService(IQuizRepository quizRepository,
                            IHttpContextAccessor contextAccessor,
                            IConfiguration configuration,
                            IUserRepository userRepository,
                            IQuestionRepository questionRepository,
                            IVariantRepository variantRepository,
-                           ITopicRepository topicRepository)
+                           ITopicRepository topicRepository,
+                           IFileService fileService,
+                           IPassedUserQuizzesRepository passedUserQuizzesRepository,
+                           IPassedUserQuestionsRepository passedUserQuestionsRepository)
         {
             _quizRepository = quizRepository;
             _contextAccessor = contextAccessor;
@@ -34,13 +39,28 @@ namespace AppHistoryServer.Services.Impl
             _questionRepository = questionRepository;
             _variantRepository = variantRepository;
             _topicRepository = topicRepository;
+            _fileService = fileService;
+            _authUtils = new AuthUtils(_configuration);
+            _passedUserQuizzesRepository = passedUserQuizzesRepository;
+            _passedUserQuestionsRepository = passedUserQuestionsRepository;
         }
 
-        public async Task<Quiz> CreateAsync(QuizPostDto model)
+        public async Task ChangeImage(int id, IFormFile file)
+        {
+            var quiz = await _quizRepository.GetByIdAsync(id);
+            if (quiz == null) throw new BadHttpRequestException("Не найден квиз");
+
+            var newPath = await _fileService.ChangeFileAsync(file, quiz.ImageUrl);
+            quiz.ImageUrl = newPath;
+            await _quizRepository.UpdateAsync(quiz);
+        }
+
+        public async Task<QuizDto> CreateAsync(QuizPostDto model)
         {
             QuizUtils.CheckModel(model);
-            
-            User user = await new AuthUtils(_configuration).GetMeUserAsync(_contextAccessor, _userRepository);
+
+            User user = await _authUtils.GetMeRequiredUserAsync(_contextAccessor, _userRepository);
+
 
 
             Quiz quiz = new Quiz()
@@ -52,24 +72,31 @@ namespace AppHistoryServer.Services.Impl
                 IsVerified = false
             };
 
-            quiz.Questions = await QuizUtils.SetQuestionsAsync(model, _questionRepository, _variantRepository, user,_topicRepository);
-            
-            return await _quizRepository.SaveAsync(quiz);
+            quiz.Questions = (await QuizUtils.SetQuestionsAsync(model, _questionRepository, _variantRepository, user, _topicRepository)).ToList();
+
+            return new QuizDto(await _quizRepository.SaveAsync(quiz));
         }
 
-        public async Task<Quiz> DeleteAsync(int id)
+        public async Task<QuizDto> DeleteAsync(int id)
         {
             var toRemove = await _quizRepository.GetByIdAsync(id);
             if (toRemove == null)
                 throw new BadHttpRequestException("Quiz with this Id not found.");
 
+            User user = await _authUtils.GetMeRequiredUserAsync(_contextAccessor, _userRepository);
+
+
+            if (toRemove.AuthorId != user.Id)
+                throw new BadHttpRequestException("Only author can delete quiz");
+
+
             var removed = await _quizRepository.DeleteAsync(toRemove);
-            return removed;
+            return new QuizDto(removed);
         }
 
-        public async Task<Quiz> GenerateQuizAsync(QuizGeneratePostDto quizGeneratePostDto, ICollection<int> topicsId, int questionsCount = 5)
+        public async Task<QuizDto> GenerateQuizAsync(QuizGeneratePostDto quizGeneratePostDto, ICollection<int> topicsId, int questionsCount = 5)
         {
-            User user = await new AuthUtils(_configuration).GetMeUserAsync(_contextAccessor, _userRepository);
+            User user = await _authUtils.GetMeRequiredUserAsync(_contextAccessor, _userRepository);
 
             if (quizGeneratePostDto.Title == null)
                 throw new BadHttpRequestException($"Квиз должен содержать тему.");
@@ -97,28 +124,123 @@ namespace AppHistoryServer.Services.Impl
             quiz.Title = quizGeneratePostDto.Title;
             quiz.Level = quizGeneratePostDto.Level;
             quiz.IsVerified = false;
-            quiz.Questions = questions;
+            quiz.Questions = questions.ToList();
 
             quiz = await _quizRepository.SaveAsync(quiz);
 
-            return quiz;
+            return new QuizDto(quiz);
         }
 
 
 
-        public IEnumerable<Quiz> GetAll()
+        public IEnumerable<QuizDto> GetAll()
         {
-            return _quizRepository.GetAll();
+            return QuizDto.GetAll(_quizRepository.GetAll());
         }
 
-        public async Task<Quiz?> GetByIdAsync(int id)
+        public async Task<ICollection<QuizDto>> GetByFilterAsync(string type, string category)
         {
-            return await _quizRepository.GetByIdAsync(id);
+            QuizCategory quizCategory = QuizCategory.POPULAR;
+            QuizType quizType = QuizType.ALL;
+
+            switch (category.ToLower())
+            {
+                case "popular":
+                    quizCategory = QuizCategory.POPULAR;
+                    break;
+                case "new":
+                    quizCategory = QuizCategory.NEW;
+                    break;
+                case "top":
+                    quizCategory = QuizCategory.TOP;
+                    break;
+                case "my":
+                    quizCategory = QuizCategory.MY;
+                    break;
+            }
+
+            switch (type.ToLower())
+            {
+                case "passed":
+                    quizType = QuizType.PASSED;
+                    break;
+                case "all":
+                    quizType = QuizType.ALL;
+                    break;
+                case "not-passed":
+                    quizType = QuizType.NOT_PASSED;
+                    break;
+            }
+
+            UserDto? user = null;
+            string? token = AuthUtils.GetTokenFromHeader(_contextAccessor);
+            if (token != null)
+                user = _authUtils.GetUserFromToken(token);
+
+            if (user == null)
+                user = new UserDto(new User());
+
+            var result = await _quizRepository.GetQuizzesByFilterAsync(quizType, quizCategory, user);
+            return QuizDto.GetAll(result).ToList();
         }
 
-        public async Task<Quiz> UpdateAsync(int id, QuizPostDto model)
+        public async Task<QuizDto?> GetByIdAsync(int id)
         {
-            User user = await new AuthUtils(_configuration).GetMeUserAsync(_contextAccessor, _userRepository);
+            return new QuizDto(await _quizRepository.GetByIdAsync(id));
+        }
+
+        public async Task<QuizDetailDto?> GetDetailByIdAsync(int id)
+        {
+            var quiz = await _quizRepository.GetByIdAsync(id);
+            if (quiz == null) return null;
+            quiz.Author = await _userRepository.GetByIdAsync(quiz.AuthorId);
+            return new QuizDetailDto(quiz);
+        }
+
+        public async Task<QuizDetailDto> PassQuizAsync(QuizPassedDto quizPassedDto)
+        {
+            User user = await _authUtils.GetMeRequiredUserAsync(_contextAccessor, _userRepository);
+
+            var existingQuiz = await _quizRepository.GetByIdAsync(quizPassedDto.QuizId);
+            if (existingQuiz == null)
+                throw new BadHttpRequestException("Квиз не найден.");
+
+            ICollection<PassedUserQuestions> passedUserQuestions = new List<PassedUserQuestions>();
+
+            for (int i = 0; i < quizPassedDto.ChoosesIndex.Count; i++)
+            {
+                var toAddQuestion = new PassedUserQuestions()
+                {
+                    ChooseIndex = quizPassedDto.ChoosesIndex[i],
+                    Question = existingQuiz.Questions[i],
+                    User = user
+                };
+                await _passedUserQuestionsRepository.SaveAsync(toAddQuestion);
+                passedUserQuestions.Add(toAddQuestion);
+            }
+
+
+            PassedUserQuizzes passedUserQuizzes = new PassedUserQuizzes()
+            {
+                PassedQuestions = passedUserQuestions,
+                Quiz = existingQuiz,
+                User = user
+            };
+            await _passedUserQuizzesRepository.SaveAsync(passedUserQuizzes);
+
+
+            if (user.LastPlay == null || user.LastPlay < DateTime.UtcNow.Date.AddDays(-1))
+                user.ShockDay++;
+
+            user.LastPlay = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user);
+
+            return new QuizDetailDto(existingQuiz);
+        }
+
+        public async Task<QuizDto> UpdateAsync(int id, QuizPostDto model)
+        {
+            User user = await _authUtils.GetMeRequiredUserAsync(_contextAccessor, _userRepository);
 
             var existingQuiz = await _quizRepository.GetByIdAsync(id);
 
@@ -138,7 +260,6 @@ namespace AppHistoryServer.Services.Impl
             existingQuiz.Title = model.Title ?? "";
             existingQuiz.Level = model.Level;
 
-
             foreach (var question in model.Questions)
             {
                 await QuestionUtils.SetVariants(question, _variantRepository);
@@ -149,9 +270,9 @@ namespace AppHistoryServer.Services.Impl
                     await _questionRepository.SaveAsync(question);
             }
 
-            existingQuiz.Questions = model.Questions;
+            existingQuiz.Questions = model.Questions.ToList();
 
-            return await _quizRepository.UpdateAsync(existingQuiz);
+            return new QuizDto((await _quizRepository.UpdateAsync(existingQuiz)));
         }
     }
 }

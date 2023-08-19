@@ -1,19 +1,26 @@
-﻿using AppHistoryServer.Models;
-using AppHistoryServer.Models.Interfaces;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Newtonsoft.Json;
 
 namespace AppHistoryServer.Dtos.ContentDtos
 {
-    public class Node : IModelId
+    public abstract class Node
     {
-        public int Id { get; set; }
-
-        public IEnumerable<Node>? childrens;
-        public Component Component { get; set; }
-
-        public Topic? Topic { get; set; }
+        [JsonProperty("componentName")]
+        public string ComponentName { get; set; }
+        [JsonProperty("padding")]
+        public string Padding { get; set; } = "0";
+        [JsonProperty("margin")]
+        public string Margin { get; set; } = "0";
         
-        public int TopicId { get; set; }
+        [JsonProperty("width")]
+        public string Width { get; set; } = "100%";
+
+        [JsonProperty("height")]
+        public string Height { get; set; } = "100%";
+
+
+        public Node()
+        {
+            ComponentName = GetType().Name;
+        }
     }
 }

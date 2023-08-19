@@ -42,6 +42,14 @@ namespace AppHistoryServer.Migrations
                         .IsUnique();
 
                     b.ToTable("Node");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Component = 1,
+                            TopicId = 1
+                        });
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.ArchiveBook", b =>
@@ -112,6 +120,9 @@ namespace AppHistoryServer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
@@ -128,6 +139,17 @@ namespace AppHistoryServer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Modules");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Test",
+                            Level = 1,
+                            Minutes = 10,
+                            Number = 1,
+                            Title = "Test"
+                        });
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.PassedUserQuestions", b =>
@@ -216,7 +238,7 @@ namespace AppHistoryServer.Migrations
                     b.Property<int?>("ArchiveBookId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AuthorId")
+                    b.Property<int?>("AuthorId")
                         .HasColumnType("integer");
 
                     b.Property<int>("CorrectVarianIndex")
@@ -226,7 +248,6 @@ namespace AppHistoryServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("QuestionText")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("TopicId")
@@ -260,6 +281,9 @@ namespace AppHistoryServer.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsVerified")
@@ -330,6 +354,16 @@ namespace AppHistoryServer.Migrations
                     b.HasIndex("ModuleId");
 
                     b.ToTable("Topics");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ContentId = 1,
+                            ModuleId = 1,
+                            Number = 1,
+                            Title = "Test"
+                        });
                 });
 
             modelBuilder.Entity("AppHistoryServer.Models.User", b =>
@@ -390,7 +424,6 @@ namespace AppHistoryServer.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -545,9 +578,7 @@ namespace AppHistoryServer.Migrations
 
                     b.HasOne("AppHistoryServer.Models.User", "Author")
                         .WithMany("CreatedQuestions")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorId");
 
                     b.HasOne("AppHistoryServer.Models.Topic", "Topic")
                         .WithMany("Questions")

@@ -19,6 +19,7 @@ namespace AppHistoryServer.Models
         [Required]
         public int Minutes { get; set; }
         public int Number { get; set; }
+        public string? ImageUrl { get; set; }
         public ICollection<Topic> Topics { get; set; } = new List<Topic>();
     }
 }

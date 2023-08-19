@@ -18,10 +18,8 @@ namespace AppHistoryServer.Models
         public Module Module { get; set; } = null!;
         public int ModuleId { get; set; }
 
-        public Node? Content { get; set; }
-        public int ContentId { get; set; }
-
-        
+        [Column(TypeName = "jsonb")]
+        public Object? Content { get; set; }
 
 
         // Relationships

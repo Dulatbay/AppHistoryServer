@@ -8,8 +8,9 @@ namespace AppHistoryServer.Dtos.VariantDtos
         public int Id { get; set; }
         public string Content { get; set; } = null!;
 
-        public VariantDto(Variant variant)
+        public VariantDto(Variant? variant)
         {
+            if(variant == null) throw new ArgumentNullException(nameof(variant));
             if(variant.Content == null) throw new ArgumentNullException(nameof(variant.Content));
             
             Id = variant.Id;

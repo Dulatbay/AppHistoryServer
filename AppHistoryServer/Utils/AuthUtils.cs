@@ -24,7 +24,7 @@ namespace AppHistoryServer.Utils
             var authClaims = new List<Claim>
                 {
                     new Claim("id", user.Id.ToString()),
-                    new Claim("userName", user.UserName),
+                    new Claim("userName", user.Username),
                     new Claim("emailAddress", user.Email),
                 };
 
@@ -65,9 +65,7 @@ namespace AppHistoryServer.Utils
             var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var securityToken);
 
             if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            {
                 return null;
-            }
 
             var userId = claimsPrincipal.FindFirstValue("id");
             var userName = claimsPrincipal.FindFirstValue("userName");
@@ -79,7 +77,7 @@ namespace AppHistoryServer.Utils
                 var user = new User
                 {
                     Id = int.Parse(userId),
-                    UserName = userName,
+                    Username = userName,
                     Email = email
                 };
 
@@ -90,7 +88,7 @@ namespace AppHistoryServer.Utils
             return null;
         }
 
-        public async Task<User> GetMeUserAsync(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
+        public async Task<User> GetMeRequiredUserAsync(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
         {
 
             string? token = AuthUtils.GetTokenFromHeader(contextAccessor);
@@ -101,7 +99,7 @@ namespace AppHistoryServer.Utils
             UserDto? userDto = new AuthUtils(_configuration).GetUserFromToken(token);
 
             if (userDto == null)
-                throw new UnauthorizedAccessException("Нет доступа.");
+                throw new UnauthorizedAccessException("Срок годности токена истек.");
 
             User? user = await userRepository.GetByIdAsync(userDto.Id);
 
@@ -112,7 +110,7 @@ namespace AppHistoryServer.Utils
         }
         public bool VerifyLoginDto(User? user, string enteredPassword)
         {
-            if (user?.UserName == null || !this.VerifyPassword(enteredPassword, user.Password))
+            if (user?.Username == null || !this.VerifyPassword(enteredPassword, user.Password))
             {
                 return false;
             }
@@ -123,7 +121,7 @@ namespace AppHistoryServer.Utils
             if (registerDto != null
               && this.IsEmail(registerDto.Email)
               && this.IsPassword(registerDto.Password)
-              && this.IsUserName(registerDto.UserName))
+              && this.IsUserName(registerDto.Username))
             {
                 return true;
             }

@@ -13,8 +13,16 @@ namespace AppHistoryServer.Repositories.Impl
             _context = context;
         }
 
-        public IEnumerable<Module> GetAll() => _context.Modules;
+        public IEnumerable<Module> GetAll() => _context.Modules.Include(x => x.Topics);
 
-        public async Task<Module?> GetByIdAsync(int id) => await _context.Modules.FirstOrDefaultAsync(m => m.Id == id);
+        public async Task<Module?> GetByIdAsync(int id) => await _context.Modules.Include(x => x.Topics).FirstOrDefaultAsync(m => m.Id == id);
+
+        public async Task<ICollection<Topic>> GetTopic(int moduleId)
+        {
+            var result = (await _context.Modules.Include(x => x.Topics).FirstOrDefaultAsync(x => x.Id == moduleId));
+            if(result == null) return new List<Topic>();
+            return result.Topics;
+        }
     }
 }
+

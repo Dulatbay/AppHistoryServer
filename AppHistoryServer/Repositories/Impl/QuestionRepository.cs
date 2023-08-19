@@ -20,13 +20,13 @@ namespace AppHistoryServer.Repositories.Impl
             return removed.Entity;
         }
 
-        public IEnumerable<Question> GetAll() => _context.Questions.Include(q=>q.Variants);
+        public IEnumerable<Question> GetAll() => _context.Questions.Include(q=>q.Variants).Include(q=>q.Topic);
 
-        public async Task<Question?> GetByIdAsync(int id) => await _context.Questions.Include(q => q.Variants).FirstOrDefaultAsync(x => x.Id == id);
+        public async Task<Question?> GetByIdAsync(int id) => await _context.Questions.Include(q => q.Variants).Include(q => q.Topic).FirstOrDefaultAsync(x => x.Id == id);
 
         public async Task<ICollection<Question>> GetQuestionsByTopicIdAsync(int topicId, int level)
         {
-            return await _context.Questions.Where(x => x.Topic.Id == topicId && x.Level == level).ToListAsync();
+            return await _context.Questions.Include(q => q.Variants).Include(q => q.Topic).Where(x => x.Topic.Id == topicId && x.Level == level).ToListAsync();
         }
 
         public async Task<Question> SaveAsync(Question question)

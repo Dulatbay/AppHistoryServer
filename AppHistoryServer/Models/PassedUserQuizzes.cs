@@ -7,6 +7,6 @@ namespace AppHistoryServer.Models
         public int Id { get; set; }
         public User User { get; set; } = null!;
         public Quiz Quiz { get; set; } = null!;
-        public ICollection<PassedUserQuestions> PassedQuestions { get; set;} = new HashSet<PassedUserQuestions>();
+        public ICollection<PassedUserQuestions> PassedQuestions { get; set;} = new List<PassedUserQuestions>();
     }
 }

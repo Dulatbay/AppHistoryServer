@@ -5,5 +5,6 @@ namespace AppHistoryServer.Repositories.Interfaces
 {
     public interface IModuleRepository : IGetterRepository<Module>
     {
+        public Task<ICollection<Topic>> GetTopic(int moduleId);
     }
 }

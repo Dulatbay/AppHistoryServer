@@ -1,15 +1,14 @@
-﻿using AppHistoryServer.Dtos.ContentDtos;
-using AppHistoryServer.Models;
+﻿using AppHistoryServer.Models;
 using AppHistoryServer.Models.Enums;
 using AppHistoryServer.Models.Variant;
-using AppHistoryServer.Utils.Initializer;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace AppHistoryServer
 {
     public class ApplicationDbContext : DbContext
     {
+        private static bool hasInitialized = false;
+
         public DbSet<User> Users { get; set; }
         public DbSet<Module> Modules { get; set; }
         public DbSet<Date> Dates { get; set; }
@@ -18,13 +17,17 @@ namespace AppHistoryServer
         public DbSet<Topic> Topics { get; set; }
         public DbSet<ArchiveBook> ArchiveBooks { get; set; }
         public DbSet<Quiz> Quizzes { get; set; }
+        public DbSet<PassedUserQuizzes> PassedUserQuizzes{ get; set; }
+        public DbSet<PassedUserQuestions> PassedUserQuestions { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
            : base(options)
         {
-            //Database.EnsureDeleted();
+            if (hasInitialized) return;
+            hasInitialized = true;
 
-            //Database.EnsureCreated();
+            Database.EnsureDeleted();
+            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,11 +54,7 @@ namespace AppHistoryServer
 
 
 
-            modelBuilder.Entity<Topic>()
-                .HasOne(t => t.Content)
-                .WithOne(c => c.Topic)
-                .HasForeignKey<Node>(c => c.TopicId);
-
+        
 
             modelBuilder.Entity<Quiz>()
             .Property(q => q.CreatedAt)
@@ -70,8 +69,6 @@ namespace AppHistoryServer
             .HasDefaultValue(League.LittleBoy);
 
 
-            ModuleInitializer.Initialize(modelBuilder);
-           
 
 
 

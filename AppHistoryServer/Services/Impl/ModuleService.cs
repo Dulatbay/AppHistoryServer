@@ -1,5 +1,5 @@
-﻿using AppHistoryServer.Models;
-using AppHistoryServer.Repositories;
+﻿using AppHistoryServer.Dtos.ModuleDtos;
+using AppHistoryServer.Dtos.TopicDto;
 using AppHistoryServer.Repositories.Interfaces;
 using AppHistoryServer.Services.Interfaces;
 
@@ -13,10 +13,15 @@ namespace AppHistoryServer.Services.Impl
         {
             _moduleRepository = moduleRepository;
         }
+        public ICollection<ModuleTopicsTitleDto> GetAllModuleTopicsTitle()
+        {
+            var modules = _moduleRepository.GetAll();
+            return ModuleTopicsTitleDto.GetAll(modules).ToList();
+        }
 
-        public IEnumerable<Module> GetAll() => _moduleRepository.GetAll();
+        public IEnumerable<ModuleDto> GetAll() => ModuleDto.GetAll(_moduleRepository.GetAll());
 
-        public async Task<Module?> GetByIdAsync(int id) => await _moduleRepository.GetByIdAsync(id);
-
+        public async Task<ModuleDto?> GetByIdAsync(int id) => new ModuleDto(await _moduleRepository.GetByIdAsync(id));
+       
     }
 }

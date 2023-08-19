@@ -1,23 +1,34 @@
 using AppHistoryServer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using AppHistoryServer.Models;
+using AppHistoryServer.Repositories.Impl;
+using AppHistoryServer.Repositories.Interfaces;
+using AppHistoryServer.Services.Impl;
+using AppHistoryServer.Services.Interfaces;
+using AppHistoryServer.Utils.Initializer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using AppHistoryServer.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using AppHistoryServer.Models;
-using AppHistoryServer.Services.Impl;
-using AppHistoryServer.Repositories.Interfaces;
-using AppHistoryServer.Repositories.Impl;
-using AppHistoryServer.Utils.Initializer;
-using AppHistoryServer.Services.BaseInterfaces;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 internal class Program
 {
     private static void Main(string[] args)
-    {
+        {
         var builder = WebApplication.CreateBuilder(args);
         var configuration = builder.Configuration;
+        
+        builder.Services.AddCors(options =>
+        {
+
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    policy.WithOrigins("*")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+        });
 
         // Add services to the container.
         builder.Services.AddControllers()
@@ -26,7 +37,7 @@ internal class Program
             );
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        //builder.Services.AddSwaggerGen();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthService, AuthService>();
@@ -34,8 +45,11 @@ internal class Program
         builder.Services.AddScoped<IModuleService, ModuleService>();
         builder.Services.AddScoped<ITopicService, TopicService>();
         builder.Services.AddScoped<IQuizService, QuizService>();
+        builder.Services.AddScoped<IFileService, FileService>();
 
         builder.Services.AddTransient<IUserRepository, UserRepository>();
+        builder.Services.AddTransient<IPassedUserQuestionsRepository, PassedUserQuestionsRepository>();
+        builder.Services.AddTransient<IPassedUserQuizzesRepository, PassedUserQuizzesRepository>();
         builder.Services.AddTransient<IVariantRepository, VariantRepository>();
         builder.Services.AddTransient<IModuleRepository, ModuleRepository>();
         builder.Services.AddTransient<IQuestionRepository, QuestionRepository>();
@@ -76,19 +90,37 @@ internal class Program
 
         var app = builder.Build();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            ModuleInitializer.InitModules(dbContext);
+            QuestionInitializer.InitQuestions(dbContext);
+            //QuizInitializer.Init(dbContext);
+            //UserInitializer.Initialize(dbContext);
+        }
+
         app.UseAuthentication();
         app.UseAuthorization();
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
+        //if (app.Environment.IsDevelopment())
+        //{
+        //    app.UseSwagger();
 
-            app.UseSwaggerUI();
-        }
+        //    app.UseSwaggerUI();
+        //}
 
         app.UseHttpsRedirection();
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(
+              Path.Combine(Directory.GetCurrentDirectory(), "Static")),
+            RequestPath = "/api/static",
+            DefaultContentType = "image",
+        });
 
+        app.UseCors();
 
 
         app.MapControllers();

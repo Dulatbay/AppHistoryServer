@@ -8,7 +8,7 @@ namespace AppHistoryServer.Models
     public class User : IModelId
     {
         public int Id { get; set; }
-        public string UserName { get; set; } = null!;
+        public string Username { get; set; } = null!;
 
         [EmailAddress]
         public string Email { get; set; } = null!;
@@ -24,13 +24,13 @@ namespace AppHistoryServer.Models
         public ICollection<Question>? CreatedQuestions { get; set; }
         public ICollection<Quiz>? CreatedQuizzes{ get; set; }
         public ICollection<Quiz>? FavoritedQuizzes{ get; set; } 
-        public ICollection<PassedUserTopics>? PassedUserTopics{ get; set; } 
-        public ICollection<PassedUserQuestions>? PassedUserQuestions{ get; set; } 
-        public ICollection<PassedUserQuizzes>? PassedUserQuizzes{ get; set; } 
+        public ICollection<PassedUserTopics> PassedUserTopics{ get; set; } = new List<PassedUserTopics>();
+        public ICollection<PassedUserQuestions> PassedUserQuestions{ get; set; } = new List<PassedUserQuestions>(); 
+        public ICollection<PassedUserQuizzes> PassedUserQuizzes{ get; set; } = new List<PassedUserQuizzes>();
 
         public static User GetUserByRegisterDto(RegisterDto register)
         {
-            return new User() { Email = register.Email, Password = register.Password, UserName = register.UserName };
+            return new User() { Email = register.Email, Password = register.Password, Username = register.Username };
         }
     }
 }
